@@ -2,7 +2,7 @@
 
 ### Install specific version for AUDITOR components
 ```
-export AUDITOR_VERSION=0.10.1-1
+export AUDITOR_VERSION=0.11.2-1
 dnf -y install auditor_apel_plugin-${AUDITOR_VERSION} 
 ```
 
@@ -10,22 +10,26 @@ dnf -y install auditor_apel_plugin-${AUDITOR_VERSION}
 An example config file and a unit file are shipped with the rpm installation adjust the config yaml file, you might need to
 adjust paths if you run an older version:
 ```
-vim /etc/auditor/auditor_apel_plugin.yml
+vi /etc/auditor/auditor_apel_plugin.yml
 ```
-here I have used the example from the AUDITOR documentation
+here I have used the example from the [AUDITOR documentation](https://alu-schumacher.github.io/AUDITOR//v0.11.2/#apel-plugin)
 ```
 !Config
 plugin:
   log_level: TRACE
-  time_json_path: /opt/auditor_apel_plugin/time.json
+  log_file: /var/log/auditor_apel_plugin.log
+  time_json_path: /var/lib/auditor_apel_plugin/time.json
   report_interval: 86400
-  message_type: summaries
-
+  
 site:
-  publish_since: 2024-01-01 06:00:00+00:00
   sites_to_report:
-    SITE_A: ["site_id_1", "site_id_2"]
-    SITE_B: ["site_id_3"]
+    SITE_A: 
+      - site_id_1 
+      - site_id_2
+    SITE_B: 
+      - site_id_3
+  benchmark_type: HEPscore23
+  ce: ARC
 
 messaging:
   host: msg.argo.grnet.gr
@@ -41,31 +45,49 @@ auditor:
   ip: 127.0.0.1
   port: 8000
   timeout: 60
-  site_meta_field: site
+  site_meta_field: site # can also be a list, e.g. [site_id, site]
   use_tls: False
+  #ca_cert_path: /path/rootCA.pem
+  #client_cert_path: /path/client-cert.pem
+  #client_key_path: /path/client-key.pem
 
 summary_fields:
   mandatory:
+    VO: !MetaField
+      name: voms
+      regex: (?<=/).*?(?=/|$)
+    Processors: !ComponentField
+      name: Cores
+    #NodeCount: !ComponentField
+    #  name: NNodes
+    SubmitHost: !MetaField
+      name: headnode
     NormalisedWallDuration: !NormalisedField
       score:
         name: hepscore23
         component_name: Cores
     CpuDuration: !ComponentField
-      name: CPUTime
+      name: TotalCPU
+      #name: CPUTime
     NormalisedCpuDuration: !NormalisedField
       base_value: !ComponentField
-        name: CPUTime
+        name: TotalCPU
+        #name: CPUTime
       score:
         name: hepscore23
         component_name: Cores
-    VO: !MetaField
-      name: group
-    SubmitHost: !MetaField
-      name: submithost
+    
+  optional:
+    GlobalUserName: !MetaField
+      name: subject
+    VOGroup: !MetaField
+      name: voms
+      regex: (?<=/).*?(?=/Role|$)
+    VORole: !MetaField
+      name: voms
+      regex: '(?=Role).*?(?=/|$)'
     Infrastructure: !ConstantField
       value: grid
-    Processors: !ComponentField
-      name: Cores
 ```
 Normally you need to use a proper host certificate and key. For testing purposes here, we need to generate a key and certificate and place them where the APEL plugin is configured to look for them.
 Change dir to `/opt/auditor_apel_plugin/` and execute the following commands:

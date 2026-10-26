@@ -2,7 +2,7 @@
 
 ### Install specific version for AUDITOR components
 ```
-export AUDITOR_VERSION=0.10.1-1
+export AUDITOR_VERSION=0.11.2-1
 dnf -y install auditor-${AUDITOR_VERSION} 
 ```
 

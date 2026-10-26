@@ -3,7 +3,7 @@
 
 ### Install specific version for AUDITOR components
 ```
-export AUDITOR_VERSION=0.10.1-1
+export AUDITOR_VERSION=0.11.2-1
 dnf -y install auditor_htcondor_collector-${AUDITOR_VERSION}
 ```
 
@@ -12,18 +12,17 @@ An example config file and a unit file are shipped with the rpm installation adj
 with /opt/auditor_htcondor_collector as its path for pre-0.10 versions:
 Attention! replace: <REPLACE_WITH_HOSTNAME> with your fully qualified hostname (`hostname -f`)!
 ```
-vim /etc/auditor/auditor_htcondor_collector.yml 
+vi /etc/auditor/auditor_htcondor_collector.yml 
 ```
-here I have used the example from the AUDITOR documentation
+here I have used the example from the [AUDITOR documentation](https://alu-schumacher.github.io/AUDITOR//v0.11.2/#htcondor-collector) with some minor changes (i.e. the site configuration and a placeholder for the pool and schedd_names)
 ```
 addr: localhost
 port: 8000
 timeout: 10
-state_db: htcondor_history_state.db
+state_db: /var/lib/auditor_htcondor_collector/htcondor_history_state.db
 record_prefix: htcondor
 interval: 900 # 15 minutes
 pool: <REPLACE_WITH_HOSTNAME>
-log_level: INFO
 schedd_names:
   - <REPLACE_WITH_HOSTNAME>
 job_status: # See https://htcondor-wiki.cs.wisc.edu/index.cgi/wiki?p=MagicNumbers
@@ -35,11 +34,11 @@ meta:
     key: Owner
     matches: ^(.+)$
   group:
-    key: "x509UserProxyVOName"
+    key: VoName
     matches: ^(.+)$
   submithost:
     key: "GlobalJobId"
-    matches: ^(.*?)#  # As this regex contains a group, the value for 'submithost' is set to the matching group.
+    matches: ^(.*)#\d+.\d+#\d+$  # As this regex contains a group, the value for 'submithost' is set to the matching group.
 
   # For `site` the first match is used.
   site:
@@ -54,25 +53,28 @@ meta:
       matches: ^slot.+@site_id_3.+$
     - name: "UNDEF"  # If no match is found, site is set to "UNDEF"
 
-
 components:
   - name: "Cores"
     key: "CpusProvisioned"
     scores:
-      - name: "hepscore23"
-        key: "MachineAttrHEPscore230"
-  - name: "RequestedMemory"
-    key: "RequestMemory"
-  - name: "UsedMemory"
-    key: "ResidentSetSize_RAW"
-  - name: "CPUTime"
-    key: "TotalCpuTime"
-  - name: "DiskUsage"
-    key: "DiskUsage_RAW"
-
+      - name: "HEPSPEC"
+        key: "MachineAttrApelSpecs0"
+        matches: HEPSPEC\D+(\d+(\.\d+)?)  # This regex matches the value of HEPSPEC in the corresponding ClassAd
+        only_if:
+          key: "LastRemoteHost"
+          matches: ^slot.+@(?:site1)-.{10}@.+$  # This score is only attributed to the component on site1
+      - name: "HEPscore23"
+        key: "MachineAttrApelSpecs0"
+        matches: HEPscore23\D+(\d+(\.\d+)?)
+        only_if:
+          key: "LastRemoteHost"
+          matches: ^slot.+@(?:site_id_[1-3])-.{10}@.+$
+  - name: "Memory"
+    key: "MemoryProvisioned"
+  - name: "TotalCPU"
+    key: "RemoteUserCpu+RemoteSysCpu"
 tls_config:
   use_tls: False
-
 ```
 Fix permissions on where the database will be created:
 ```
