@@ -6,8 +6,8 @@ First we fill the condor_history withg some toy data. Therefore we need to insta
 
 ```
 sudo dnf config-manager --set-enabled crb
-yum install https://research.cs.wisc.edu/htcondor/repo/24.x/htcondor-release-current.el9.noarch.rpm
-yum install condor
+yum install -y https://research.cs.wisc.edu/htcondor/repo/24.x/htcondor-release-current.el9.noarch.rpm
+yum install -y condor
 ```
 
 #### minimal configuration

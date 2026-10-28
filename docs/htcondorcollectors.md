@@ -19,12 +19,12 @@ here I have used the example from the [AUDITOR documentation](https://alu-schuma
 addr: localhost
 port: 8000
 timeout: 10
-state_db: /var/lib/auditor_htcondor_collector/htcondor_history_state.db
+state_db: htcondor_history_state.db
 record_prefix: htcondor
 interval: 900 # 15 minutes
-pool: <REPLACE_WITH_HOSTNAME>
+pool: testauditordemoio.cern.ch
 schedd_names:
-  - <REPLACE_WITH_HOSTNAME>
+  - testauditordemoio.cern.ch
 job_status: # See https://htcondor-wiki.cs.wisc.edu/index.cgi/wiki?p=MagicNumbers
   - 3 # Removed
   - 4 # Completed
@@ -36,10 +36,11 @@ meta:
   group:
     key: VoName
     matches: ^(.+)$
-  submithost:
+  headnode:
     key: "GlobalJobId"
     matches: ^(.*)#\d+.\d+#\d+$  # As this regex contains a group, the value for 'submithost' is set to the matching group.
-
+  voms:
+    key: VoName
   # For `site` the first match is used.
   site:
     - name: "site_id_1"  # This entry
@@ -62,17 +63,19 @@ components:
         matches: HEPSPEC\D+(\d+(\.\d+)?)  # This regex matches the value of HEPSPEC in the corresponding ClassAd
         only_if:
           key: "LastRemoteHost"
-          matches: ^slot.+@(?:site1)-.{10}@.+$  # This score is only attributed to the component on site1
-      - name: "HEPscore23"
+          matches: ^slot.+@(?:site_id_[1-3])-.{10}@.+$
+      - name: "HEPScore23"
         key: "MachineAttrApelSpecs0"
         matches: HEPscore23\D+(\d+(\.\d+)?)
         only_if:
           key: "LastRemoteHost"
-          matches: ^slot.+@(?:site_id_[1-3])-.{10}@.+$
+          matches: ^slot.+@site_id_[1-3].+$
   - name: "Memory"
     key: "MemoryProvisioned"
   - name: "TotalCPU"
     key: "RemoteUserCpu+RemoteSysCpu"
+  - name: "NNodes"
+    key: "NodeCount"
 tls_config:
   use_tls: False
 ```
@@ -103,9 +106,9 @@ Mar 11 15:16:34 auditor-demo.novalocal systemd[1]: Started HTCondor collector fo
 ```
 later on you will find the following errors:
 ```
-auditor.collectors.htcondor - WARNING  - Could not find last job id for schedd 'schedd1.example.com' and recor>
+auditor.collectors.htcondor - WARNING  - Could not find last job id for schedd 'testauditordemoio.cern.ch' and record prefix 'htcondor'. Starting from timestamp.
 auditor.collectors.htcondor - ERROR    - Error querying HTCondor history:
-b'Unable to locate remote schedd (name=schedd1.example.com, pool=htcondor.example.com).\n'
+b'/bin/sh: line 1: condor_history: command not found\n'
 auditor.collectors.htcondor - INFO     - Added 0 records.
 ```
 This is expected: We have no HTCondor installed and running and therefore we cannot collect data atm. We see that in a later step.

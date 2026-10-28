@@ -58,13 +58,13 @@ summary_fields:
       regex: (?<=/).*?(?=/|$)
     Processors: !ComponentField
       name: Cores
-    #NodeCount: !ComponentField
-    #  name: NNodes
+    NodeCount: !ComponentField
+      name: NNodes
     SubmitHost: !MetaField
       name: headnode
     NormalisedWallDuration: !NormalisedField
       score:
-        name: hepscore23
+        name: HEPScore23
         component_name: Cores
     CpuDuration: !ComponentField
       name: TotalCPU
@@ -74,9 +74,9 @@ summary_fields:
         name: TotalCPU
         #name: CPUTime
       score:
-        name: hepscore23
+        name: HEPScore23
         component_name: Cores
-    
+
   optional:
     GlobalUserName: !MetaField
       name: subject
@@ -125,13 +125,16 @@ systemctl status auditor_apel_plugin.service
      CGroup: /system.slice/auditor_apel_plugin.service
              └─91729 //opt/auditor_apel_plugin/venv/bin/python /opt/auditor_apel_plugin/venv/bin/auditor-apel-publish --config /etc/auditor/auditor_apel_plugin.yml
 
-Started APEL plugin for AUDITOR.
-INFO     Enough time since last report, create new report (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/au>
-INFO     Getting records for site SITE_A with site_ids: ['site_id_1', 'site_id_2'] (//opt/auditor_apel_plugin/venv/lib/p>
-INFO     No new records for SITE_A (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publi>
-INFO     Getting records for site SITE_B with site_ids: ['site_id_3'] (//opt/auditor_apel_plugin/venv/lib/python3.9/site>
-INFO     No new records for SITE_B (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publi>
-INFO     Next report scheduled for 2025-03-12 15:30:22.034452 (//opt/auditor_apel_plugin/venv/lib/python3.9/site-package>
+TRACE    Query to AUDITOR: stop_time[lt]=2026-10-25T00:00:00+00:00&stop_time[gte]=2026-10-24T00:00:00+00:00&runtime[gt]=0&meta[site][c][0]=site_id_3 (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/core.py at line 59)
+WARNING  No records for SITE_B on this day (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 98)
+INFO     Getting records for 2026-10-25 for site SITE_B with clusters: ['site_id_3'] (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 88)
+TRACE    Query to AUDITOR: stop_time[lt]=2026-10-26T00:00:00+00:00&stop_time[gte]=2026-10-25T00:00:00+00:00&runtime[gt]=0&meta[site][c][0]=site_id_3 (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/core.py at line 59)
+WARNING  No records for SITE_B on this day (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 98)
+INFO     Getting records for 2026-10-26 for site SITE_B with clusters: ['site_id_3'] (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 88)
+TRACE    Query to AUDITOR: stop_time[lt]=2026-10-27T00:00:00+00:00&stop_time[gte]=2026-10-26T00:00:00+00:00&runtime[gt]=0&meta[site][c][0]=site_id_3 (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/core.py at line 59)
+WARNING  No records for SITE_B on this day (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 98)
+WARNING  No records for site SITE_B in this month (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 132)
+INFO     Next report scheduled for 2026-10-27 13:04:23.573088+00:00 (//opt/auditor_apel_plugin/venv/lib/python3.9/site-packages/auditor_apel_plugin/publish.py at line 170)
 ```
 This is again expected, because we do not have any data and the sites `['site_id_1', 'site_id_2']` do not exist.
 
